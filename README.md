@@ -79,17 +79,6 @@ Once started, navigate to `http://localhost:3000` in your browser.
 
 ---
 
-## Deployment
-
-This repository is pre-configured for static deployment on GitHub Pages:
-
-1. Navigate to repository Settings > Pages.
-2. Under "Build and deployment", set Source to "Deploy from a branch".
-3. Select the `main` branch with the root `/` folder.
-4. Save the configuration.
-
----
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for complete details.
