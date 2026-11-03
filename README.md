@@ -2,7 +2,7 @@
 
 Client-side image processing utility for resizing, dimensional cropping, file size optimization, and format conversion.
 
-Live Application: [https://vladanila.github.io/imagist/](https://vladanila.github.io/imagist/)
+Live Application: [https://vladanila.github.io/imagist/](https://vladanila.github.io/Imagist/)
 
 ---
 
