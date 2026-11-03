@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Imagist.</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./logo.png" />
+  <link rel="apple-touch-icon" href="./logo.png" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Cropper.js CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+  <!-- jsPDF CDN for PDF conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Minimalist Styles -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col selection:bg-[#FF3B30] selection:text-white overflow-x-hidden">
+
+  <!-- Header -->
+  <header class="border-b border-[#1C1C1E] px-4 sm:px-6 py-3.5 sticky top-0 z-40 bg-black/90 backdrop-blur">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center justify-between w-full sm:w-auto">
+        <a href="./" class="flex items-center gap-2.5 group">
+          <img src="./logo.png" alt="Imagist Logo" class="w-8 h-8 rounded-lg object-cover border border-[#2C2C2E] shadow-sm" />
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[#FF3B30]">Imagist.</h1>
+        </a>
+
+        <!-- Mobile-only right actions -->
+        <div class="flex items-center gap-2 sm:hidden">
+          <div id="mobile-header-actions" class="hidden">
+            <button class="btn-change-image-trigger text-xs bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white p-2 rounded-lg flex items-center transition" title="New Image">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <a href="https://github.com/vladanila/Imagist" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-[#121214] border border-[#2C2C2E] text-[#8E8E93] hover:text-white transition" title="GitHub Repository">
+            <i data-lucide="github" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Resize & Crop vs Quick Convert) -->
+      <nav class="flex items-center w-full sm:w-auto bg-[#121214] border border-[#1C1C1E] p-1 rounded-xl text-xs">
+        <button id="tab-resizer" class="tab-button active flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-white font-medium bg-[#1C1C1E] transition text-center">
+          Resize & Crop
+        </button>
+        <button id="tab-converter" class="tab-button flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-[#8E8E93] hover:text-white transition text-center">
+          Convert Format
+        </button>
+      </nav>
+
+      <!-- Desktop Right Actions -->
+      <div class="hidden sm:flex items-center gap-2.5">
+        <div id="header-actions" class="hidden">
+          <button id="btn-change-image" class="text-xs bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>New Image</span>
+          </button>
+        </div>
+
+        <a href="https://github.com/vladanila/Imagist" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-[#8E8E93] hover:text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+          <i data-lucide="github" class="w-3.5 h-3.5"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-6xl mx-auto px-4 py-6 sm:py-8 w-full flex flex-col justify-center">
+
+    <!-- ================= MODE 1: RESIZE & CROP ================= -->
+    <div id="view-resizer" class="w-full">
+      
+      <!-- Minimal Dropzone (Initial state) -->
+      <div id="dropzone-container" class="dropzone rounded-2xl p-10 sm:p-24 text-center cursor-pointer relative max-w-2xl mx-auto w-full">
+        <input type="file" id="file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" />
+        
+        <div class="flex flex-col items-center justify-center space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-[#121214] border border-[#2C2C2E] flex items-center justify-center text-[#FF3B30]">
+            <i data-lucide="upload" class="w-6 h-6"></i>
+          </div>
+          <div class="space-y-1">
+            <p class="text-sm sm:text-base font-medium text-white">
+              Drop image to resize & compress, or <span class="text-[#FF3B30] underline underline-offset-4">browse</span>
+            </p>
+            <p class="text-xs text-[#8E8E93]">
+              Supports JPG, PNG, WEBP, BMP • Paste with <kbd class="px-1.5 py-0.5 rounded bg-[#1C1C1E] text-white text-[11px] font-mono">Ctrl+V</kbd>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workspace (Visible after image load) -->
+      <div id="editor-workspace" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+
+        <!-- Left Column: Cropper (7 Cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="panel rounded-xl p-3.5 sm:p-4 space-y-3">
+            
+            <!-- Cropper Container -->
+            <div class="relative bg-black rounded-lg overflow-hidden border border-[#1C1C1E] min-h-[260px] sm:min-h-[340px] max-h-[500px] flex items-center justify-center">
+              <img id="cropper-image" src="" alt="Source preview" class="max-w-full max-h-[480px] block" />
+            </div>
+
+            <!-- Cropper Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+              <div class="flex items-center gap-1.5">
+                <button id="btn-rotate-left" title="Rotate Left 90°" class="p-2 rounded-lg bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white transition">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="btn-rotate-right" title="Rotate Right 90°" class="p-2 rounded-lg bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white transition">
+                  <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="btn-flip-h" title="Flip Horizontally" class="p-2 rounded-lg bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white transition">
+                  <i data-lucide="flip-horizontal" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="btn-reset-crop" title="Reset Crop" class="p-2 rounded-lg bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white transition">
+                  <i data-lucide="undo" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+              <label class="flex items-center gap-2 cursor-pointer text-[#8E8E93] hover:text-white select-none">
+                <input type="checkbox" id="lock-ratio-toggle" class="w-3.5 h-3.5 rounded bg-[#121214] border-[#2C2C2E] accent-[#FF3B30]" />
+                <span>Lock Ratio</span>
+              </label>
+            </div>
+
+          </div>
+
+          <!-- Filters Section -->
+          <div class="panel rounded-xl p-3.5 sm:p-4 space-y-3">
+            <div class="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">Filters</div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button data-filter="none" class="filter-btn active py-2.5 px-3 rounded-lg text-xs font-medium border border-[#FF3B30] bg-[#FF3B30]/10 text-white transition text-center">
+                Original
+              </button>
+              <button data-filter="clean-signature" class="filter-btn py-2.5 px-3 rounded-lg text-xs font-medium border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white transition text-center">
+                Clean Signature
+              </button>
+              <button data-filter="enhance" class="filter-btn py-2.5 px-3 rounded-lg text-xs font-medium border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white transition text-center">
+                Enhance
+              </button>
+              <button data-filter="grayscale" class="filter-btn py-2.5 px-3 rounded-lg text-xs font-medium border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white transition text-center">
+                B&W
+              </button>
+            </div>
+
+            <!-- Sensitivity slider (for clean-signature) -->
+            <div id="signature-slider-box" class="hidden pt-2 border-t border-[#1C1C1E] space-y-2">
+              <div class="flex items-center justify-between text-xs text-[#8E8E93]">
+                <span>Background Whitening</span>
+                <span id="slider-threshold-val" class="font-mono text-white">170</span>
+              </div>
+              <input type="range" id="signature-threshold" min="100" max="240" value="170" class="w-full h-1.5 bg-[#2C2C2E] rounded appearance-none cursor-pointer accent-[#FF3B30]" />
+            </div>
+          </div>
+
+          <!-- Optional Name & Date Stamp -->
+          <div class="panel rounded-xl p-3.5 sm:p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">Name & Date Stamp</div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="stamp-toggle" class="sr-only peer" />
+                <div class="w-8 h-4 bg-[#2C2C2E] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#FF3B30]"></div>
+              </label>
+            </div>
+
+            <div id="stamp-inputs" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <input type="text" id="input-candidate-name" placeholder="NAME" class="w-full rounded-lg px-3 py-2 text-xs uppercase" />
+              <input type="text" id="input-photo-date" placeholder="DATE (e.g. 03/11/2026)" class="w-full rounded-lg px-3 py-2 text-xs" />
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Settings, Preview & Download (5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+
+          <!-- Live Result Card -->
+          <div class="panel rounded-xl p-4 sm:p-5 space-y-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold uppercase tracking-wider text-[#8E8E93]">Result Preview</span>
+              <span id="stat-size" class="font-mono text-sm font-bold text-white">-- KB</span>
+            </div>
+
+            <!-- Preview Frame -->
+            <div class="preview-canvas-bg rounded-lg p-3 flex items-center justify-center min-h-[200px] sm:min-h-[220px] border border-[#1C1C1E] relative">
+              <img id="preview-image" src="" alt="Result" class="max-h-[190px] max-w-full rounded border border-[#2C2C2E] object-contain" />
+              <div id="processing-loader" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center text-xs text-white">
+                <i data-lucide="loader-2" class="w-5 h-5 text-[#FF3B30] animate-spin"></i>
+              </div>
+            </div>
+
+            <!-- Output Stats & Status -->
+            <div class="flex items-center justify-between text-xs text-[#8E8E93] px-1 font-mono">
+              <span>Dimensions: <strong id="stat-dimensions" class="text-white">-- × --</strong></span>
+              <span>Format: <strong id="stat-format" class="text-white uppercase">JPG</strong></span>
+            </div>
+
+            <!-- Download Button -->
+            <button id="btn-download" class="w-full bg-[#FF3B30] hover:bg-[#E02E24] text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg shadow-[#FF3B30]/20 active:scale-[0.99]">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span id="btn-download-text">Download Image</span>
+            </button>
+          </div>
+
+          <!-- Custom Dimensions & Target Size -->
+          <div class="panel rounded-xl p-4 sm:p-5 space-y-4">
+            <div class="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">Image Specifications</div>
+
+            <!-- Format Selector in Resizer -->
+            <div class="space-y-1.5">
+              <label class="text-xs text-[#8E8E93]">Output Format</label>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button data-outformat="jpeg" class="resizer-format-btn active py-1.5 rounded-lg text-xs font-medium border border-[#FF3B30] bg-[#FF3B30]/10 text-white transition">JPG</button>
+                <button data-outformat="png" class="resizer-format-btn py-1.5 rounded-lg text-xs font-medium border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white transition">PNG</button>
+                <button data-outformat="webp" class="resizer-format-btn py-1.5 rounded-lg text-xs font-medium border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white transition">WEBP</button>
+                <button data-outformat="pdf" class="resizer-format-btn py-1.5 rounded-lg text-xs font-medium border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white transition">PDF</button>
+              </div>
+            </div>
+
+            <!-- Dimensions (W x H) -->
+            <div class="space-y-2 pt-2 border-t border-[#1C1C1E]">
+              <div class="flex items-center justify-between text-xs">
+                <label class="text-[#8E8E93]">Dimensions</label>
+                <div class="flex items-center gap-1 text-[11px]">
+                  <button id="unit-px" class="px-2 py-0.5 rounded bg-white text-black font-semibold">px</button>
+                  <button id="unit-cm" class="px-2 py-0.5 rounded bg-[#121214] text-[#8E8E93] hover:text-white">cm</button>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="relative">
+                  <input type="number" id="input-width" value="350" min="20" max="6000" class="w-full rounded-lg px-3 py-2 text-xs font-mono pr-8" />
+                  <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-[#636366] text-xs unit-label">px</span>
+                </div>
+                <div class="relative">
+                  <input type="number" id="input-height" value="450" min="20" max="6000" class="w-full rounded-lg px-3 py-2 text-xs font-mono pr-8" />
+                  <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-[#636366] text-xs unit-label">px</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Target Size Range (KB) -->
+            <div id="target-kb-box" class="space-y-2 pt-2 border-t border-[#1C1C1E]">
+              <div class="text-xs text-[#8E8E93]">Target File Size</div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label for="input-min-kb" class="block text-[11px] text-[#636366] mb-1">Min (KB)</label>
+                  <input type="number" id="input-min-kb" value="20" min="1" max="1000" class="w-full rounded-lg px-3 py-2 text-xs font-mono" />
+                </div>
+                <div>
+                  <label for="input-max-kb" class="block text-[11px] text-[#636366] mb-1">Max (KB)</label>
+                  <input type="number" id="input-max-kb" value="50" min="2" max="5000" class="w-full rounded-lg px-3 py-2 text-xs font-mono" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Apply Specs -->
+            <button id="btn-reapply-specs" class="w-full py-2.5 rounded-lg bg-[#121214] hover:bg-[#1C1C1E] border border-[#2C2C2E] text-white text-xs font-medium transition flex items-center justify-center gap-1.5 active:scale-[0.99]">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-[#FF3B30]"></i>
+              <span>Apply Changes</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ================= MODE 2: STANDALONE FORMAT CONVERTER ================= -->
+    <div id="view-converter" class="hidden w-full max-w-2xl mx-auto space-y-6">
+      
+      <!-- Converter Dropzone (When no file loaded) -->
+      <div id="converter-dropzone" class="dropzone rounded-2xl p-10 sm:p-20 text-center cursor-pointer relative w-full">
+        <input type="file" id="converter-file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" />
+        
+        <div class="flex flex-col items-center justify-center space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-[#121214] border border-[#2C2C2E] flex items-center justify-center text-[#FF3B30]">
+            <i data-lucide="file-type" class="w-6 h-6"></i>
+          </div>
+          <div class="space-y-1">
+            <p class="text-sm sm:text-base font-medium text-white">
+              Drop image to convert format, or <span class="text-[#FF3B30] underline underline-offset-4">browse</span>
+            </p>
+            <p class="text-xs text-[#8E8E93]">
+              Convert between JPG, PNG, WEBP, and PDF instantly in your browser
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Converter Workspace (When file loaded) -->
+      <div id="converter-workspace" class="hidden panel rounded-2xl p-5 sm:p-8 space-y-6">
+        
+        <!-- File Info Bar -->
+        <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#121214] border border-[#1C1C1E]">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#1C1C1E] flex items-center justify-center text-[#FF3B30]">
+              <i data-lucide="image" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div id="conv-file-name" class="text-sm font-semibold text-white truncate max-w-[180px] sm:max-w-xs">photo.jpg</div>
+              <div id="conv-file-meta" class="text-xs text-[#8E8E93] font-mono">1.2 MB • JPEG</div>
+            </div>
+          </div>
+          <button id="btn-conv-change-file" class="text-xs text-[#8E8E93] hover:text-white px-2.5 py-1.5 rounded-lg bg-[#1C1C1E] border border-[#2C2C2E] transition">
+            Change
+          </button>
+        </div>
+
+        <!-- Format Options -->
+        <div class="space-y-3">
+          <label class="text-xs font-semibold uppercase tracking-wider text-[#8E8E93] block">
+            Convert To:
+          </label>
+          <div class="grid grid-cols-4 gap-2 sm:gap-2.5">
+            <button data-target="jpeg" class="conv-format-btn active py-3 px-2 sm:px-4 rounded-xl border border-[#FF3B30] bg-[#FF3B30]/10 text-white font-semibold text-xs sm:text-sm transition text-center">
+              JPG
+            </button>
+            <button data-target="png" class="conv-format-btn py-3 px-2 sm:px-4 rounded-xl border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white font-semibold text-xs sm:text-sm transition text-center">
+              PNG
+            </button>
+            <button data-target="webp" class="conv-format-btn py-3 px-2 sm:px-4 rounded-xl border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white font-semibold text-xs sm:text-sm transition text-center">
+              WEBP
+            </button>
+            <button data-target="pdf" class="conv-format-btn py-3 px-2 sm:px-4 rounded-xl border border-[#2C2C2E] bg-[#121214] text-[#8E8E93] hover:text-white font-semibold text-xs sm:text-sm transition text-center">
+              PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Conversion Output Summary -->
+        <div class="p-4 rounded-xl bg-[#121214] border border-[#1C1C1E] flex items-center justify-between text-xs font-mono">
+          <div class="text-[#8E8E93]">
+            Output Size: <span id="conv-output-size" class="text-white font-bold text-sm ml-1">-- KB</span>
+          </div>
+          <div class="text-[#8E8E93]">
+            Format: <span id="conv-output-format" class="text-[#FF3B30] font-bold uppercase ml-1">JPG</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button id="btn-convert-download" class="w-full bg-[#FF3B30] hover:bg-[#E02E24] text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg shadow-[#FF3B30]/20 active:scale-[0.99]">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Convert & Download</span>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Minimal Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-200 pointer-events-none">
+    <div class="bg-[#121214] border border-[#2C2C2E] text-white text-xs px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2">
+      <span id="toast-message">Notification</span>
+    </div>
+  </div>
+
+  <!-- Application Script -->
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

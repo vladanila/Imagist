@@ -1,0 +1,142 @@
+/* styles.css - Minimalist Black & Apple Red Theme */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --apple-red: #FF3B30;
+  --apple-red-hover: #E02E24;
+  --bg-black: #000000;
+  --panel-black: #0A0A0A;
+  --panel-border: #1C1C1E;
+  --panel-border-hover: #2C2C2E;
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E8E93;
+  --text-muted: #636366;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-black);
+  color: var(--text-primary);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, a {
+  touch-action: manipulation;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.text-apple-red {
+  color: var(--apple-red);
+}
+
+.bg-apple-red {
+  background-color: var(--apple-red);
+}
+
+.bg-apple-red:hover {
+  background-color: var(--apple-red-hover);
+}
+
+.border-apple-red {
+  border-color: var(--apple-red);
+}
+
+/* Minimal panels */
+.panel {
+  background-color: var(--panel-black);
+  border: 1px solid var(--panel-border);
+}
+
+.panel:hover {
+  border-color: var(--panel-border-hover);
+}
+
+/* Custom inputs */
+input[type="number"],
+input[type="text"] {
+  background-color: #121214;
+  border: 1px solid var(--panel-border);
+  color: #FFFFFF;
+  transition: border-color 0.15s ease;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+  border-color: var(--apple-red);
+  outline: none;
+}
+
+/* Dropzone styling */
+.dropzone {
+  background-color: #050505;
+  border: 1px dashed #2C2C2E;
+  transition: all 0.2s ease;
+}
+
+.dropzone:hover,
+.dropzone.drag-over {
+  border-color: var(--apple-red);
+  background-color: rgba(255, 59, 48, 0.04);
+}
+
+/* Cropper styling - Apple dark aesthetic */
+.cropper-view-box,
+.cropper-face {
+  border-radius: 2px;
+  outline-color: var(--apple-red);
+}
+
+.cropper-line {
+  background-color: var(--apple-red);
+}
+
+.cropper-point {
+  background-color: #FFFFFF;
+  width: 8px;
+  height: 8px;
+}
+
+.cropper-bg {
+  background-image: none;
+  background-color: #000000;
+}
+
+/* Checkerboard for result preview */
+.preview-canvas-bg {
+  background-color: #050505;
+  background-image: 
+    linear-gradient(45deg, #0e0e0e 25%, transparent 25%), 
+    linear-gradient(-45deg, #0e0e0e 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #0e0e0e 75%), 
+    linear-gradient(-45deg, transparent 75%, #0e0e0e 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
